@@ -1,14 +1,14 @@
 module testbench;
 
-    reg       clk;
-    reg       rst;
-    reg       wr_en;
-    reg       rd_en;
+    reg clk;
+    reg  rst;
+    reg wr_en;
+    reg rd_en;
     reg [7:0] din;
 
     wire [7:0] dout;
-    wire       full;
-    wire       empty;
+    wire full;
+    wire empty;
 
     integer i;
 
@@ -24,7 +24,8 @@ module testbench;
           );
 
   
-    always begin
+    always
+begin
         #10 clk = ~clk;
     end
 
@@ -44,20 +45,20 @@ module testbench;
         rst   = 1'b0; 
         #20;
 
-        $display("--- STEP 1: Writing Data Till Full ---");
+        $display("step 1: Writing Data Till Full");
         for (i = 0; i < 16; i = i + 1) begin
             @(posedge clk);
             wr_en = 1'b1;
             din   = i + 1; 
             #1;
-            $display("Write Action: Data=%d, Full=%b, Empty=%b", din, full, empty);
+            $display("Write now: Data=%d, Full=%b, Empty=%b", din, full, empty);
         end
         
         @(posedge clk);
         wr_en = 1'b0; 
         #40;
 
-        $display("STEP 2: Reading Data Till Empty");
+        $display("step 2: Reading Data Till Empty");
       
         for (i = 0; i < 16; i = i + 1) begin
             @(posedge clk);
@@ -65,14 +66,14 @@ module testbench;
             #1;
           
           
-            $display("Read Action: Data=%d, Full=%b, Empty=%b", dout, full, empty);
+            $display("Read now: Data=%d, Full=%b, Empty=%b", dout, full, empty);
         end
         
         @(posedge clk);
         rd_en = 1'b0; 
         #40;
 
-      $display("STEP 3: Basic Test");
+      $display("step 3: Basic Test");
         @(posedge clk);
         wr_en = 1'b1; din = 8'hAA;
         @(posedge clk);
