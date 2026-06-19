@@ -1,0 +1,88 @@
+module testbench;
+
+    reg       clk;
+    reg       rst;
+    reg       wr_en;
+    reg       rd_en;
+    reg [7:0] din;
+
+    wire [7:0] dout;
+    wire       full;
+    wire       empty;
+
+    integer i;
+
+  
+  fifo DUT(.clk(clk), 
+        .rst(rst), 
+        .wr_en(wr_en), 
+        .rd_en(rd_en), 
+        .din(din), 
+        .dout(dout), 
+        .full(full), 
+        .empty(empty)
+          );
+
+  
+    always begin
+        #10 clk = ~clk;
+    end
+
+    initial
+      begin
+        
+        $dumpfile("fifo.vcd");
+        $dumpvars(0,testbench)
+       
+        clk   = 1'b0;
+        rst   = 1'b1;
+        wr_en = 1'b0;
+        rd_en = 1'b0;
+        din   = 8'd0;
+        
+        #40;
+        rst   = 1'b0; 
+        #20;
+
+        $display("--- STEP 1: Writing Data Till Full ---");
+        for (i = 0; i < 16; i = i + 1) begin
+            @(posedge clk);
+            wr_en = 1'b1;
+            din   = i + 1; 
+            #1;
+            $display("Write Action: Data=%d, Full=%b, Empty=%b", din, full, empty);
+        end
+        
+        @(posedge clk);
+        wr_en = 1'b0; 
+        #40;
+
+        $display("STEP 2: Reading Data Till Empty");
+      
+        for (i = 0; i < 16; i = i + 1) begin
+            @(posedge clk);
+            rd_en = 1'b1;
+            #1;
+          
+          
+            $display("Read Action: Data=%d, Full=%b, Empty=%b", dout, full, empty);
+        end
+        
+        @(posedge clk);
+        rd_en = 1'b0; 
+        #40;
+
+      $display("STEP 3: Basic Test");
+        @(posedge clk);
+        wr_en = 1'b1; din = 8'hAA;
+        @(posedge clk);
+        wr_en = 1'b1; rd_en = 1'b1; din = 8'hBB;
+        #20;
+        wr_en = 1'b0; rd_en = 1'b0;
+        
+        #40;
+        $display("Simulation Test Done");
+        $finish;
+    end
+
+endmodule
