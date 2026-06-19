@@ -1,0 +1,59 @@
+module fifo (
+    input  wire       clk,
+    input  wire       rst,
+    input  wire       wr_en,
+    input  wire       rd_en,
+    input  wire [7:0] din,
+    output reg  [7:0] dout,
+    output reg        full,
+    output reg        empty
+);
+
+    
+    reg [7:0] mem [0:15];
+    
+
+    reg [3:0] wr_ptr;
+    reg [3:0] rd_ptr;
+    
+    
+    reg [4:0] count;
+
+   
+    always @(posedge clk or posedge rst) begin
+        if (rst == 1'b1) begin
+            wr_ptr <= 4'b0000;
+            rd_ptr <= 4'b0000;
+            count  <= 5'b00000;
+            dout   <= 8'b00000000;
+            full   <= 1'b0;
+            empty  <= 1'b1;
+        end 
+        else begin
+          
+            if (wr_en == 1'b1 && full == 1'b0) begin
+                mem[wr_ptr] <= din;
+                wr_ptr      <= wr_ptr + 1'b1;
+            end
+
+          
+            if (rd_en == 1'b1 && empty == 1'b0) begin
+                dout   <= mem[rd_ptr];
+                rd_ptr <= rd_ptr + 1'b1;
+            end
+
+          
+            if ((wr_en == 1'b1 && full == 1'b0) && !(rd_en == 1'b1 && empty == 1'b0)) begin
+                count <= count + 1'b1;
+            end 
+            else if ((rd_en == 1'b1 && empty == 1'b0) && !(wr_en == 1'b1 && full == 1'b0)) begin
+                count <= count - 1'b1;
+            end
+
+            
+            full  <= (count == 5'd16);
+            empty <= (count == 5'd0);
+        end
+    end
+
+endmodule
